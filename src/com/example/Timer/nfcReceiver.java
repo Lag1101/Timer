@@ -1,4 +1,4 @@
-package com.example.myapp;
+package com.example.Timer;
 
 import android.app.Activity;
 import android.app.PendingIntent;

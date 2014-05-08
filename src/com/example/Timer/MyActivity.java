@@ -1,4 +1,4 @@
-package com.example.myapp;
+package com.example.Timer;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
