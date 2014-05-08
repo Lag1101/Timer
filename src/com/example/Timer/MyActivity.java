@@ -1,16 +1,17 @@
 package com.example.Timer;
 
-import android.content.Intent;
-import android.content.SharedPreferences;
+import android.app.Activity;
+import android.app.AlarmManager;
+import android.app.PendingIntent;
+import android.content.*;
 import android.content.res.Configuration;
+import android.graphics.Color;
 import android.os.Bundle;
+import android.os.PowerManager;
 import android.os.SystemClock;
 import android.view.View;
 import android.view.WindowManager;
-import android.widget.Chronometer;
-import android.widget.LinearLayout;
-import android.widget.TextView;
-import android.widget.ToggleButton;
+import android.widget.*;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -53,6 +54,7 @@ public class MyActivity extends nfcReceiver {
         }
     }
 
+
     @Override
     public void onResume()
     {
@@ -63,6 +65,7 @@ public class MyActivity extends nfcReceiver {
     public void onPause()
     {
         super.onPause();
+        saveDates();
     }
     @Override
     public void onDestroy()
@@ -88,7 +91,6 @@ public class MyActivity extends nfcReceiver {
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
-        //setContentView(R.layout.timer);
     }
 
     private void saveDates() {
