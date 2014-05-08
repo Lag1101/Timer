@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:orientation="vertical"
+              android:layout_width="fill_parent"
+              android:layout_height="fill_parent"
+              android:weightSum="1">
+    <Chronometer
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/chronometer"
+            android:autoText="true"
+            android:textSize="80sp" android:layout_gravity="center_horizontal"/>
+    <ToggleButton
+            android:layout_width="128dp"
+            android:layout_height="86dp"
+            android:text="New ToggleButton"
+            android:onClick="onToggleClicked"
+            android:id="@+id/toggleButton"
+            android:checked="false"
+            android:textOn="stop"
+            android:textOff="start"
+            android:layout_gravity="center_horizontal" android:textSize="20dp"/>
+    <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:id="@+id/scrollView" android:layout_gravity="center_horizontal">
+        <LinearLayout
+                android:orientation="vertical"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:id="@+id/timeList">
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout>
+
