@@ -2,6 +2,7 @@ package com.example.Timer;
 
 import android.app.Activity;
 import android.app.AlarmManager;
+import android.app.DialogFragment;
 import android.app.PendingIntent;
 import android.content.*;
 import android.content.res.Configuration;
@@ -13,38 +14,38 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.*;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.List;
+import java.util.*;
 
 
 public class MyActivity extends nfcReceiver {
 
     private Chronometer chronometer;
     private LinearLayout timeList;
-    private List<Event> dates;
+    private List<Event> dates = new ArrayList<Event>();
+    private Alarm alarm = new Alarm();
+    public long msForAlarm = 0;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        //getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
         setContentView(R.layout.timer);
 
         chronometer = (Chronometer)findViewById(R.id.chronometer);
         timeList = (LinearLayout)findViewById(R.id.timeList);
-        dates = new ArrayList<Event>();
         loadDates();
-    }
 
-    public void onClear(View view) {
-        dates.clear();
-        timeList.removeAllViews();
+    }
+    public void showTimePickerDialog(View v) {
+        DialogFragment newFragment = new MyTimePicker();
+        newFragment.show(getFragmentManager(), "timePicker");
     }
     public void onToggleClicked(View view) {
 
         addEventAndView("click");
+
+        alarm.SetAlarm(this, msForAlarm);
 
         if (((ToggleButton) view).isChecked()) {
             chronometer.setBase(SystemClock.elapsedRealtime());
