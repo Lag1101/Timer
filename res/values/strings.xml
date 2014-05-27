@@ -3,6 +3,6 @@
     <string name="app_name">Timer</string>
     <string name="alarm_button">Alarm</string>
     <string name="pick_time">Pick time</string>
-
+    <string name="service_started">service_started</string>
 
 </resources>
