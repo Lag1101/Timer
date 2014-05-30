@@ -15,38 +15,37 @@ import android.view.WindowManager;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.util.Arrays;
 import java.util.Calendar;
 
 /**
  * Created by vasiliy.lomanov on 08.05.2014.
  */
-public class nfcReceiver extends Activity {
+public class nfcReceiver {
 
 
-    private String nfcText;
+
     private NfcAdapter mNfcAdapter;
     private IntentFilter[] intentFiltersArray;
     private PendingIntent pendingIntent;
     private String[][] techListsArray;
 
-    protected Tag tag;
+    public Tag tag;
 
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+    Activity parentActivity = null;
 
-        setContentView(R.layout.timer);
+    public nfcReceiver(Activity activity) {
 
-        mNfcAdapter = NfcAdapter.getDefaultAdapter(this);
+        parentActivity = activity;
+
+        mNfcAdapter = NfcAdapter.getDefaultAdapter(activity);
         if (mNfcAdapter == null) {
-            Toast.makeText(this, "NFC is not available", Toast.LENGTH_LONG).show();
-            finish();
+            Toast.makeText(activity, "NFC is not available", Toast.LENGTH_LONG).show();
             return;
         }
 
         pendingIntent = PendingIntent.getActivity(
-                this, 0, new Intent(this, getClass()).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP), 0);
+                activity, 0, new Intent(activity, activity.getClass()).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP), 0);
 
         // Setup an intent filter for all MIME based dispatches
         IntentFilter ndef = new IntentFilter(NfcAdapter.ACTION_NDEF_DISCOVERED);
@@ -69,29 +68,19 @@ public class nfcReceiver extends Activity {
         } };
     }
 
-    private TextView getTimedTextView(String msg) {
-        TextView text = new TextView(this);
-        text.setText(msg + " " + Calendar.getInstance().getTime().toString());
-        return text;
-    }
-
-    @Override
     public void onResume()
     {
-        super.onResume();
-        mNfcAdapter.enableForegroundDispatch(this, pendingIntent, intentFiltersArray, techListsArray);
+        mNfcAdapter.enableForegroundDispatch(parentActivity, pendingIntent, intentFiltersArray, techListsArray);
     }
 
-    @Override
     public void onPause()
     {
-        super.onPause();
-        mNfcAdapter.disableForegroundDispatch(this);
+        mNfcAdapter.disableForegroundDispatch(parentActivity);
     }
 
-    @Override
     public void onNewIntent(Intent intent){
         // fetch the tag from the intent
         tag = (Tag)intent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
+        Toast.makeText(parentActivity, Arrays.toString(tag.getId()), Toast.LENGTH_LONG).show();
     }
 }

@@ -1,9 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen
         xmlns:android="http://schemas.android.com/apk/res/android">
-    <EditTextPreference android:key="time"
-                android:title="Time"
-                android:summary="time to alarm"
-                android:inputType="time"
-                android:defaultValue="9:00:00"/>
+    <EditTextPreference
+            android:key="time"
+            android:title="Time"
+            android:inputType="time"
+            android:summary="time to alarm"
+            android:defaultValue="3600000"/>
+
+    <com.example.Timer.TimePreference
+            android:key="timePick"
+            android:defaultValue="09:00"
+            android:title="Time"
+            android:summary="time to alarm"/>
+
+
 </PreferenceScreen>

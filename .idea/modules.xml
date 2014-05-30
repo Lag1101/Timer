@@ -4,8 +4,6 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/Timer.iml" filepath="$PROJECT_DIR$/Timer.iml" />
       <module fileurl="file://$PROJECT_DIR$/../SlidingMenu/com.menorking.android.iml" filepath="$PROJECT_DIR$/../SlidingMenu/com.menorking.android.iml" />
-      <module fileurl="file://$PROJECT_DIR$/../SlidingMenu/library/slidingmenu.iml" filepath="$PROJECT_DIR$/../SlidingMenu/library/slidingmenu.iml" />
-      <module fileurl="file://$PROJECT_DIR$/../SlidingMenu/library-maps-support/slidingmenu-maps-support.iml" filepath="$PROJECT_DIR$/../SlidingMenu/library-maps-support/slidingmenu-maps-support.iml" />
     </modules>
   </component>
 </project>

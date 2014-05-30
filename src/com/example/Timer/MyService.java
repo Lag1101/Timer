@@ -1,9 +1,4 @@
 package com.example.Timer;
-import java.text.DateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.Timer;
-import java.util.TimerTask;
 
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -12,27 +7,71 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.os.*;
-import android.util.Log;
-import android.widget.Chronometer;
 import android.widget.Toast;
 
+import java.text.DateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.Locale;
+
 public class MyService extends Service {
-    private NotificationManager nm;
-    private Timer timer = new Timer();
-    private int counter = 0, incrementby = 1;
+    private Date alarmTime = null;
+    private mAlarm alarm = null;
     private static boolean isRunning = false;
 
+    private NotificationManager mNotificationManager;
+    // Sets an ID for the notification, so it can be updated
+    private Notification.Builder mNotifyBuilder;
+
     ArrayList<Messenger> mClients = new ArrayList<Messenger>(); // Keeps track of all current registered clients.
-    int mValue = 0; // Holds last value set by a client.
     static final int MSG_REGISTER_CLIENT = 1;
     static final int MSG_UNREGISTER_CLIENT = 2;
-    static final int MSG_SET_INT_VALUE = 3;
-    static final int MSG_SET_STRING_VALUE = 4;
+    static final int MSG_START = 3;
+    static final int MSG_STOP = 4;
+    static final int MSG_TICK = 5;
+    static final int MSG_ALARM_TIME = 6;
     final Messenger mMessenger = new Messenger(new IncomingHandler()); // Target we publish for clients to send messages to IncomingHandler.
 
-    public NotificationManager mNotificationManager;
-    // Sets an ID for the notification, so it can be updated
-    public Notification.Builder mNotifyBuilder;
+    class mAlarm extends Alarm {
+        boolean alarmed = false;
+
+        @Override
+        public void Start() {
+            alarmed = false;
+            super.Start();
+        }
+
+        @Override
+        public void onTick(long elapsed, Date now) {
+            String time = DateFormat.getTimeInstance().format(elapsed - 3 * 60 * 60 * 1000);
+            mNotifyBuilder.setContentText(time);
+            mNotificationManager.notify(0, mNotifyBuilder.build());
+            for (int i = mClients.size() - 1; i >= 0; i--) {
+                try {
+                    // Send data as an Integer
+                    mClients.get(i).send(Message.obtain(null, MSG_TICK, time));
+                } catch (RemoteException e) {
+                    // The client is dead. Remove it from the list; we are going through the list from back to front so this is safe to do inside the loop.
+                    mClients.remove(i);
+                }
+            }
+
+            if (now.after(alarmTime) && !alarmed) {
+                alarmed = true;
+
+                Intent newIntent = new Intent(getBaseContext(), AlarmActivity.class);
+                newIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                startActivity(newIntent);
+
+                {
+                    Vibrator vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+                    vibrator.vibrate(2000);
+                }
+                //chronometer.stop();
+            }
+        }
+    }
 
     @Override
     public IBinder onBind(Intent intent) {
@@ -41,37 +80,35 @@ public class MyService extends Service {
     class IncomingHandler extends Handler { // Handler of incoming messages from clients.
         @Override
         public void handleMessage(Message msg) {
-            switch (msg.what) {
-                case MSG_REGISTER_CLIENT:
-                    mClients.add(msg.replyTo);
-                    break;
-                case MSG_UNREGISTER_CLIENT:
-                    mClients.remove(msg.replyTo);
-                    break;
-                case MSG_SET_INT_VALUE:
-                    incrementby = msg.arg1;
-                    break;
-                default:
-                    super.handleMessage(msg);
-            }
-        }
-    }
-    private void sendMessageToUI(int intvaluetosend) {
-        for (int i=mClients.size()-1; i>=0; i--) {
             try {
-                // Send data as an Integer
-                mClients.get(i).send(Message.obtain(null, MSG_SET_INT_VALUE, intvaluetosend, 0));
+                switch (msg.what) {
+                    case MSG_REGISTER_CLIENT:
+                        mClients.add(msg.replyTo);
+                        if(alarmTime != null)
+                            msg.replyTo.send(Message.obtain(null, MSG_ALARM_TIME, alarmTime));
+                        break;
+                    case MSG_UNREGISTER_CLIENT:
+                        mClients.remove(msg.replyTo);
+                        break;
+                    case MSG_START:
+                        alarmTime = DateFormat.getDateTimeInstance().parse((String) msg.obj);
+                        Toast.makeText(MyService.this, (String) msg.obj, Toast.LENGTH_SHORT).show();
 
-                //Send data as a String
-                Bundle b = new Bundle();
-                b.putString("str1", "ab" + intvaluetosend + "cd");
-                Message msg = Message.obtain(null, MSG_SET_STRING_VALUE);
-                msg.setData(b);
-                mClients.get(i).send(msg);
+                        if( alarm == null )
+                            alarm = new mAlarm();
+                        alarm.Start();
 
-            } catch (RemoteException e) {
-                // The client is dead. Remove it from the list; we are going through the list from back to front so this is safe to do inside the loop.
-                mClients.remove(i);
+                        msg.replyTo.send(Message.obtain(null, MSG_ALARM_TIME, alarmTime));
+                        break;
+                    case MSG_STOP:
+                        alarm.Stop();
+                        alarm = null;
+                        break;
+                    default:
+                        super.handleMessage(msg);
+                }
+            } catch (Exception ex){
+                Toast.makeText(MyService.this, ex.getMessage(), Toast.LENGTH_SHORT).show();
             }
         }
     }
@@ -84,30 +121,21 @@ public class MyService extends Service {
         isRunning = true;
 
         mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-        mNotifyBuilder = new Notification.Builder(this)
-                .setContentTitle("New Message")
-                .setSmallIcon(R.drawable.ic_launcher);
 
-        final Date destTime = new Date(/*(new Date()).getTime()+10000*/);
-        timer.scheduleAtFixedRate(new TimerTask(){ public void run() {
-            Date elapsed = MyActivity.msToDate( (int)(-destTime.getTime() + (new Date()).getTime()) );
-            mNotifyBuilder.setContentText(DateFormat.getTimeInstance().format(elapsed));
-            mNotificationManager.notify(0, mNotifyBuilder.build());
-        }}, 0, 1000);
-    }
-    private void showNotification() {
-        nm = (NotificationManager)getSystemService(NOTIFICATION_SERVICE);
-        // In this sample, we'll use the same text for the ticker and the expanded notification
-        CharSequence text = getText(R.string.service_started);
-        // Set the icon, scrolling text and timestamp
-        Notification notification = new Notification(R.drawable.ic_launcher, text, System.currentTimeMillis());
-        // The PendingIntent to launch our activity if the user selects this notification
-        PendingIntent contentIntent = PendingIntent.getActivity(this, 0, new Intent(this, MyActivity.class), 0);
-        // Set the info for the views that show in the notification panel.
-        notification.setLatestEventInfo(this, getText(R.string.app_name), text, contentIntent);
-        // Send the notification.
-        // We use a layout id because it is a unique number.  We use it later to cancel.
-        nm.notify(R.string.service_started, notification);
+        Intent intent = new Intent(this, MyActivity.class);
+        //intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+
+        PendingIntent resultPendingIntent = PendingIntent.getActivity(
+                this,
+                0,
+                intent,
+                PendingIntent.FLAG_UPDATE_CURRENT
+        );
+
+        mNotifyBuilder = new Notification.Builder(this)
+                .setContentTitle("Worked")
+                .setSmallIcon(R.drawable.ic_launcher)
+                .setContentIntent(resultPendingIntent);
     }
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
@@ -120,24 +148,10 @@ public class MyService extends Service {
         return isRunning;
     }
 
-
-    private void onTimerTick() {
-        Log.i("TimerTick", "Timer doing work." + counter);
-        try {
-            counter += incrementby;
-            sendMessageToUI(counter);
-
-        } catch (Throwable t) { //you should always ultimately catch all exceptions in timer tasks.
-            Log.e("TimerTick", "Timer Tick Failed.", t);
-        }
-    }
-
     @Override
     public void onDestroy() {
         super.onDestroy();
-        if (timer != null) {timer.cancel();}
-        counter=0;
-        nm.cancel(R.string.service_started); // Cancel the persistent notification.
+        mNotificationManager.cancel(R.string.service_started); // Cancel the persistent notification.
         Toast.makeText(this, "Service stopped", Toast.LENGTH_SHORT).show();
         isRunning = false;
     }

@@ -1,12 +1,9 @@
 package com.example.Timer;
 
 import android.app.Activity;
-import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.view.WindowManager;
-import android.widget.Chronometer;
-import android.widget.LinearLayout;
 
 /**
  * Created by vasiliy.lomanov on 12.05.2014.
