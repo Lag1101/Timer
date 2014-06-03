@@ -6,20 +6,20 @@
               android:weightSum="1">
     <TextView
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="80sp"
             android:textAppearance="?android:attr/textAppearanceLarge"
             android:textSize="40sp"
             android:id="@+id/ticker" android:layout_gravity="center" android:gravity="center"
-            android:layout_weight="0.03"/>
+            android:layout_weight="0.1"/>
     <TextView
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="80sp"
             android:textAppearance="?android:attr/textAppearanceLarge"
-            android:id="@+id/dateOfAlarm" android:layout_gravity="center_horizontal" android:layout_weight="0.09"/>
+            android:id="@+id/dateOfAlarm" android:layout_gravity="center_horizontal" android:layout_weight="0.1"/>
     <LinearLayout
             android:orientation="horizontal"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" android:weightSum="1">
+            android:layout_height="wrap_content" android:weightSum="1" android:layout_weight="0.1">
         <ToggleButton
                 android:layout_width="match_parent"
                 android:layout_height="62dp"
@@ -30,5 +30,17 @@
                 android:textOff="start"
                 android:layout_gravity="center_horizontal" android:textSize="20sp"/>
     </LinearLayout>
+    <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="255dp"
+            android:id="@+id/scrollView"
+            android:fillViewport="false" android:layout_weight="0.70">
+        <LinearLayout
+                android:orientation="vertical"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/datum">
+        </LinearLayout>
+    </ScrollView>
 </LinearLayout>
 

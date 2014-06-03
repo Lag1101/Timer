@@ -9,6 +9,8 @@ import android.content.Intent;
 import android.os.*;
 import android.widget.Toast;
 
+import java.io.FileOutputStream;
+import java.io.ObjectOutputStream;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -21,10 +23,12 @@ public class MyService extends Service {
     private static boolean isRunning = false;
 
     private NotificationManager mNotificationManager;
-    // Sets an ID for the notification, so it can be updated
     private Notification.Builder mNotifyBuilder;
 
     ArrayList<Messenger> mClients = new ArrayList<Messenger>(); // Keeps track of all current registered clients.
+
+    public History.Writer history;
+
     static final int MSG_REGISTER_CLIENT = 1;
     static final int MSG_UNREGISTER_CLIENT = 2;
     static final int MSG_START = 3;
@@ -34,14 +38,6 @@ public class MyService extends Service {
     final Messenger mMessenger = new Messenger(new IncomingHandler()); // Target we publish for clients to send messages to IncomingHandler.
 
     class mAlarm extends Alarm {
-        boolean alarmed = false;
-
-        @Override
-        public void Start() {
-            alarmed = false;
-            super.Start();
-        }
-
         @Override
         public void onTick(long elapsed, Date now) {
             String time = DateFormat.getTimeInstance().format(elapsed - 3 * 60 * 60 * 1000);
@@ -57,8 +53,8 @@ public class MyService extends Service {
                 }
             }
 
-            if (now.after(alarmTime) && !alarmed) {
-                alarmed = true;
+            if (alarmTime != null && now.after(alarmTime)) {
+                alarmTime = null;
 
                 Intent newIntent = new Intent(getBaseContext(), AlarmActivity.class);
                 newIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -89,20 +85,24 @@ public class MyService extends Service {
                         break;
                     case MSG_UNREGISTER_CLIENT:
                         mClients.remove(msg.replyTo);
+                        history.writeAll(MyService.this);
                         break;
                     case MSG_START:
                         alarmTime = DateFormat.getDateTimeInstance().parse((String) msg.obj);
                         Toast.makeText(MyService.this, (String) msg.obj, Toast.LENGTH_SHORT).show();
 
-                        if( alarm == null )
-                            alarm = new mAlarm();
+                        if( alarm == null ) alarm = new mAlarm();
                         alarm.Start();
-
                         msg.replyTo.send(Message.obtain(null, MSG_ALARM_TIME, alarmTime));
+
+                        history.addNow();
+
                         break;
                     case MSG_STOP:
                         alarm.Stop();
                         alarm = null;
+
+                        history.addNow();
                         break;
                     default:
                         super.handleMessage(msg);
@@ -123,7 +123,6 @@ public class MyService extends Service {
         mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 
         Intent intent = new Intent(this, MyActivity.class);
-        //intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 
         PendingIntent resultPendingIntent = PendingIntent.getActivity(
                 this,
@@ -136,6 +135,8 @@ public class MyService extends Service {
                 .setContentTitle("Worked")
                 .setSmallIcon(R.drawable.ic_launcher)
                 .setContentIntent(resultPendingIntent);
+
+        history = new History.Writer(this); // TODO load from internal storage
     }
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
@@ -151,6 +152,9 @@ public class MyService extends Service {
     @Override
     public void onDestroy() {
         super.onDestroy();
+        history.writeAll(this);
+        mNotifyBuilder.setContentText("Destroyed");
+        mNotificationManager.notify(0, mNotifyBuilder.build());
         mNotificationManager.cancel(R.string.service_started); // Cancel the persistent notification.
         Toast.makeText(this, "Service stopped", Toast.LENGTH_SHORT).show();
         isRunning = false;

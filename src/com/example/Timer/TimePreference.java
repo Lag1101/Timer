@@ -76,18 +76,23 @@ public class TimePreference extends DialogPreference {
     @Override
     protected void onSetInitialValue(boolean restoreValue, Object defaultValue) {
 
-        if (restoreValue) {
-            if (defaultValue == null) {
-                calendar.setTimeInMillis(getPersistedLong(System.currentTimeMillis()));
+        try {
+            if (restoreValue) {
+                if (defaultValue == null) {
+                    calendar.setTimeInMillis(getPersistedLong(System.currentTimeMillis()));
+                } else {
+                    calendar.setTimeInMillis(DateFormat.getTimeFormat(getContext()).parse((String) defaultValue).getTime());
+                }
             } else {
-                calendar.setTimeInMillis(Long.parseLong(getPersistedString((String) defaultValue)));
+                if (defaultValue == null) {
+                    calendar.setTimeInMillis(System.currentTimeMillis());
+                } else {
+                    calendar.setTimeInMillis(DateFormat.getTimeFormat(getContext()).parse((String) defaultValue).getTime());
+                }
             }
-        } else {
-            if (defaultValue == null) {
-                calendar.setTimeInMillis(System.currentTimeMillis());
-            } else {
-                calendar.setTimeInMillis(Long.parseLong((String) defaultValue));
-            }
+        } catch (Exception ex) {
+            Toast.makeText(getContext(), ex.getMessage(), Toast.LENGTH_SHORT).show();
+            calendar.setTimeInMillis(0);
         }
         setSummary(getSummary());
     }

@@ -8,12 +8,12 @@ import android.preference.PreferenceManager;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.TextView;
-import android.widget.TimePicker;
-import android.widget.Toast;
-import android.widget.ToggleButton;
+import android.widget.*;
 
+import java.io.FileOutputStream;
+import java.io.ObjectOutputStream;
 import java.text.DateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Map;
 
@@ -21,9 +21,10 @@ import java.util.Map;
 public class MyActivity extends Activity {
     private TextView ticker;
     private TextView dateOfAlarm;
-    SharedPreferences preferenceManager;
+    private LinearLayout datumLayout;
+    private SharedPreferences preferenceManager;
 
-    //private nfcReceiver nfcreceiver;
+    private nfcReceiver nfcreceiver;
     //static final String WORK_ID = "[52, -63, 9, -63, 62, -28, 54]";
 
     Messenger mService = null;
@@ -77,7 +78,16 @@ public class MyActivity extends Activity {
         startService( new Intent(this, MyService.class));
         doBindService();
 
-        //nfcreceiver = new nfcReceiver(this);
+        History history = new History(this);
+
+        nfcreceiver = new nfcReceiver(this);
+
+        datumLayout = (LinearLayout)findViewById(R.id.datum);
+        for ( Date date : history.events ) {
+            TextView textView = new TextView(this);
+            textView.setText( DateFormat.getDateTimeInstance().format(date) );
+            datumLayout.addView(textView);
+        }
     }
 
     private void sendMessageToService(int command, String text) {
@@ -125,7 +135,13 @@ public class MyActivity extends Activity {
 
             //all.get("timePick")
             long msForAlarm = 3*60*60*1000+preferenceManager.getLong("timePick", 0);
-            String strDateToAlarm = DateFormat.getDateTimeInstance().format(new Date().getTime() + msForAlarm);
+            Date now = new Date();
+            {
+                TextView textView = new TextView(this);
+                textView.setText( DateFormat.getDateTimeInstance().format(now) );
+                datumLayout.addView( textView );
+            }
+            String strDateToAlarm = DateFormat.getDateTimeInstance().format(now.getTime() + msForAlarm);
             dateOfAlarm.setText( strDateToAlarm );
 
             sendMessageToService(MyService.MSG_START, strDateToAlarm);
@@ -137,7 +153,7 @@ public class MyActivity extends Activity {
     @Override
     public void onResume()
     {
-        //nfcreceiver.onResume();
+        nfcreceiver.onResume();
         super.onResume();
     }
     @Override

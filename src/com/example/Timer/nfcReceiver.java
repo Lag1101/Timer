@@ -22,9 +22,6 @@ import java.util.Calendar;
  * Created by vasiliy.lomanov on 08.05.2014.
  */
 public class nfcReceiver {
-
-
-
     private NfcAdapter mNfcAdapter;
     private IntentFilter[] intentFiltersArray;
     private PendingIntent pendingIntent;
