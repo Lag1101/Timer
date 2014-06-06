@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:orientation="vertical"
+              android:layout_width="fill_parent"
+              android:layout_height="fill_parent"
+              android:weightSum="1"
+              android:id="@+id/timerFragment">
+    <TextView
+            android:layout_width="match_parent"
+            android:layout_height="80sp"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:textSize="40sp"
+            android:id="@+id/ticker" android:layout_gravity="center" android:gravity="center"
+            android:layout_weight="0.1"/>
+    <TextView
+            android:layout_width="match_parent"
+            android:layout_height="80sp"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:id="@+id/dateOfAlarm" android:layout_gravity="center_horizontal" android:layout_weight="0.1"/>
+    <ToggleButton
+            android:layout_width="match_parent"
+            android:layout_height="62dp"
+            android:id="@+id/toggleButton"
+            android:checked="false"
+            android:textOn="stop"
+            android:textOff="start"
+            android:layout_gravity="center_horizontal" android:textSize="20sp"/>
+</LinearLayout>

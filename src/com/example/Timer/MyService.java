@@ -7,6 +7,7 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.os.*;
+import android.widget.TimePicker;
 import android.widget.Toast;
 
 import java.io.FileOutputStream;
@@ -42,7 +43,9 @@ public class MyService extends Service {
         public void onTick(long elapsed, Date now) {
             String time = DateFormat.getTimeInstance().format(elapsed - 3 * 60 * 60 * 1000);
             mNotifyBuilder.setContentText(time);
-            mNotificationManager.notify(0, mNotifyBuilder.build());
+            Notification notification = mNotifyBuilder.build();
+            //notification.flags  |= Notification.FLAG_ONGOING_EVENT;
+            mNotificationManager.notify(0, notification);
             for (int i = mClients.size() - 1; i >= 0; i--) {
                 try {
                     // Send data as an Integer
@@ -122,7 +125,7 @@ public class MyService extends Service {
 
         mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 
-        Intent intent = new Intent(this, MyActivity.class);
+        Intent intent = new Intent(this, Pager.class);
 
         PendingIntent resultPendingIntent = PendingIntent.getActivity(
                 this,
