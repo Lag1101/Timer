@@ -3,7 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/Timer.iml" filepath="$PROJECT_DIR$/Timer.iml" />
-      <module fileurl="file://$PROJECT_DIR$/../SlidingMenu/com.menorking.android.iml" filepath="$PROJECT_DIR$/../SlidingMenu/com.menorking.android.iml" />
+      <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
     </modules>
   </component>
 </project>
